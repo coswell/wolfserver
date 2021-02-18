@@ -95,6 +95,7 @@ class PointLog(models.Model):
 
 class RoomInfo(models.Model):
     room_id = models.CharField(primary_key=True, max_length=32)
+    judge = models.CharField(blank=True, max_length=255)
     status = models.IntegerField(blank=True, null=True)
     g_seer = models.IntegerField(blank=True, null=True)
     g_witch = models.IntegerField(blank=True, null=True)
@@ -103,7 +104,7 @@ class RoomInfo(models.Model):
     g_idiot = models.IntegerField(blank=True, null=True)
     g_knight = models.IntegerField(blank=True, null=True)
     g_silence = models.IntegerField(blank=True, null=True)
-    g_tombkeeper = models.IntegerField(db_column='g_tombKeeper', blank=True, null=True)  # Field name made lowercase.
+    g_tombKeeper = models.IntegerField(blank=True, null=True)
     v_rogue = models.IntegerField(blank=True, null=True)
     v_villager = models.IntegerField(blank=True, null=True)
     w_whiteking = models.IntegerField(blank=True, null=True)
@@ -113,7 +114,7 @@ class RoomInfo(models.Model):
     w_werewolf = models.IntegerField(blank=True, null=True)
     t_thief = models.IntegerField(blank=True, null=True)
     t_bomberman = models.IntegerField(blank=True, null=True)
-    t_cupid = models.IntegerField(db_column='t_Cupid', blank=True, null=True)  # Field name made lowercase.
+    t_Cupid = models.IntegerField(blank=True, null=True)
     sheriff = models.IntegerField(blank=True, null=True)
     witch_save = models.IntegerField(blank=True, null=True)
     doublepills = models.IntegerField(blank=True, null=True)
