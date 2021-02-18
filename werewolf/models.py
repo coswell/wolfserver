@@ -20,9 +20,10 @@ class BasePointLog(models.Model):
 
 
 class BaseRoles(models.Model):
-    role_id = models.IntegerField(primary_key=True)
+    role_id = models.CharField(primary_key=True, max_length=32)
     role_name = models.CharField(max_length=255, blank=True, null=True)
     role_description = models.CharField(max_length=255, blank=True, null=True)
+    role_group = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -94,17 +95,29 @@ class PointLog(models.Model):
 
 class RoomInfo(models.Model):
     room_id = models.CharField(primary_key=True, max_length=32)
-    role1 = models.IntegerField(blank=True, null=True)
-    role2 = models.IntegerField(blank=True, null=True)
-    role3 = models.IntegerField(blank=True, null=True)
-    role4 = models.IntegerField(blank=True, null=True)
-    role5 = models.IntegerField(blank=True, null=True)
-    role6 = models.IntegerField(blank=True, null=True)
-    role7 = models.IntegerField(blank=True, null=True)
-    role8 = models.IntegerField(blank=True, null=True)
-    special_rule1 = models.IntegerField(blank=True, null=True)
-    special_rule2 = models.IntegerField(blank=True, null=True)
-    special_rule3 = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    g_seer = models.IntegerField(blank=True, null=True)
+    g_witch = models.IntegerField(blank=True, null=True)
+    g_hunter = models.IntegerField(blank=True, null=True)
+    g_savior = models.IntegerField(blank=True, null=True)
+    g_idiot = models.IntegerField(blank=True, null=True)
+    g_knight = models.IntegerField(blank=True, null=True)
+    g_silence = models.IntegerField(blank=True, null=True)
+    g_tombkeeper = models.IntegerField(db_column='g_tombKeeper', blank=True, null=True)  # Field name made lowercase.
+    v_rogue = models.IntegerField(blank=True, null=True)
+    v_villager = models.IntegerField(blank=True, null=True)
+    w_whiteking = models.IntegerField(blank=True, null=True)
+    w_blackking = models.IntegerField(blank=True, null=True)
+    w_gargoyle = models.IntegerField(blank=True, null=True)
+    w_wolfbeauty = models.IntegerField(blank=True, null=True)
+    w_werewolf = models.IntegerField(blank=True, null=True)
+    t_thief = models.IntegerField(blank=True, null=True)
+    t_bomberman = models.IntegerField(blank=True, null=True)
+    t_cupid = models.IntegerField(db_column='t_Cupid', blank=True, null=True)  # Field name made lowercase.
+    sheriff = models.IntegerField(blank=True, null=True)
+    witch_save = models.IntegerField(blank=True, null=True)
+    doublepills = models.IntegerField(blank=True, null=True)
+    keepandsave = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
