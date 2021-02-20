@@ -33,28 +33,44 @@ class createRoom(APIView):
 
     # 创建一个状态为未开始的房间
     def post(self, request):
-        pdata = json.loads(request.body, encoding='utf-8')
-        # print(pdata)
-        roomid = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        roominfo = {
-            "room_id":roomid,
-            "status":0
+        gamingroom = RoomInfo.objects.get(status=0)
+        if gamingroom:
+            roomid = gamingroom.room_id
+            errcode = 1
+            creater = BaseUser.objects.get(uid=gamingroom.judge)
+            res = {
+                "errcode": errcode,
+                "roomid": roomid,
+                "creater": creater.uname
             }
-        for group,detail in pdata.items():
-            if group == "configs": # 暂时跳过特殊规则的设置
-                for config,desc in detail.items():
-                    tempdict = {config:desc["selected"]}
+        else:
+            pdata = json.loads(request.body, encoding='utf-8')
+            # print(pdata)
+            roomid = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+            roominfo = {
+                "room_id":roomid,
+                "status":0
+                }
+            for group,detail in pdata.items():
+                if group == "configs": # 暂时跳过特殊规则的设置
+                    for config,desc in detail.items():
+                        tempdict = {config:desc["selected"]}
+                        roominfo = dict(roominfo, **tempdict)
+                elif group == "user":
+                    tempdict = {"judge":detail}
                     roominfo = dict(roominfo, **tempdict)
-            elif group == "user":
-                tempdict = {"judge":detail}
-                roominfo = dict(roominfo, **tempdict)
-            else:
-                for role,number in detail.items():
-                    if role == "total":
-                        continue
-                    tempdict = {role:number}
-                    roominfo = dict(roominfo, **tempdict)
-        # print(roominfo)
-        newroom = RoomInfo(**roominfo)
-        newroom.save()
-        return Response(status=200, data={"roomid":roomid})
+                else:
+                    for role,number in detail.items():
+                        if role == "total":
+                            continue
+                        tempdict = {role:number}
+                        roominfo = dict(roominfo, **tempdict)
+            # print(roominfo)
+            newroom = RoomInfo(**roominfo)
+            newroom.save()
+            errcode = 0
+            res = {
+                "errcode": errcode,
+                "roomid": roomid
+            }
+        return Response(status=200, data=res)
