@@ -75,3 +75,36 @@ class createRoom(APIView):
                 "roomid": roomid
             }
         return Response(status=200, data=res)
+
+
+class getRoomInfo(APIView):
+
+    def get(self, request):
+        userid = request.GET.get('user')
+        roomid = request.GET.get('room')
+        actuallyuser = BaseUser.objects.get(uid=userid)
+        tempdict = {
+            "selfname": actuallyuser.uname
+        }
+        room = RoomPlayer2Role.objects.get(room_id=roomid)
+        selfcard = self.getselfcard(userid, room)
+        tempdict["selfcard"] = selfcard
+        room_ser = RoomDetailSer(room)
+        return Response(status=200, data={**tempdict, **room_ser.data})
+
+    def getselfcard(self, actuallyuser, obj):
+        card = None
+        for k in range(18):
+            # 获取演员
+            playernumber = "player" + str(k+1)
+            playeruid = eval("obj." + playernumber)
+            if actuallyuser == playeruid:
+                # 获取角色
+                rolenumber = "role" + str(k+1)
+                roleuid = eval("obj." + rolenumber)
+                rolename = None
+                if roleuid:
+                    role = BaseRoles.objects.get(role_id=roleuid)
+                    rolename = role.role_description
+                    card = rolename + '.jpg'
+        return card
