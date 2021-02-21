@@ -87,8 +87,9 @@ class getRoomInfo(APIView):
             "selfname": actuallyuser.uname
         }
         room = RoomPlayer2Role.objects.get(room_id=roomid)
-        selfcard = self.getselfcard(userid, room)
+        selfcard,playernumber = self.getselfseatinfo(userid, room)
         tempdict["selfcard"] = selfcard
+        tempdict["playernumber"] = playernumber
         room_ser = RoomDetailSer(room)
         return Response(status=200, data={**tempdict, **room_ser.data})
 
@@ -107,4 +108,69 @@ class getRoomInfo(APIView):
                     role = BaseRoles.objects.get(role_id=roleuid)
                     rolename = role.role_description
                     card = rolename + '.jpg'
-        return card
+                break
+        return (card,playernumber)
+
+class seatAct(APIView):
+
+    def get(self, request): #user,room,pre,to
+        userid = request.GET.get('user')
+        preseat = request.GET.get('pre')
+        toseat = request.GET.get('to')
+        roomid = request.GET.get('room')
+        roominfo = RoomInfo.objects.get(room_id=roomid)
+        room = RoomPlayer2Role.objects.get(room_id=roomid)
+        roomptoseat = getattr(room,toseat)
+        if roominfo.status != 0:
+            res = {
+                "errcode": 999,
+                "msg": "游戏状态异常，不能入座/更换座位"
+            }
+        elif request.GET.get('type') == "0": # 入座
+            if roomptoseat != None: # 检查座位是否有人
+                res = {
+                    "errcode": 1,
+                    "msg": "该座位已经有人了！"
+                }
+            else:
+                if preseat == '0' or not preseat : # 不需离座，直接入座
+                    setattr(room, toseat, userid)
+                    try:
+                        room.save()
+                        res = {
+                            "errcode": 0,
+                            "msg": "入座成功！"
+                        }
+                    except:
+                        res = {
+                            "errcode": 999,
+                            "msg": "游戏状态异常，不能入座/更换座位"
+                        }
+                else: # 先离座，后入座
+                    setattr(room, preseat, None)
+                    setattr(room, toseat, userid)
+                    try:
+                        room.save()
+                        res = {
+                            "errcode": 0,
+                            "msg": "入座成功！"
+                        }
+                    except:
+                        res = {
+                            "errcode": 999,
+                            "msg": "游戏状态异常，不能入座/更换座位"
+                        }
+        else: # 离座
+            setattr(room, preseat, None)
+            try:
+                room.save()
+                res = {
+                    "errcode": 0,
+                    "msg": "离座成功！"
+                }
+            except:
+                res = {
+                    "errcode": 999,
+                    "msg": "游戏状态异常，不能入座/更换座位"
+                }
+        return Response(status=200, data=res)
