@@ -280,6 +280,16 @@ class RoomPlayer2Role(models.Model):
         db_table = 'room_player2role'
 
 
+class RoomRolePreselection(models.Model):
+    room_id = models.CharField(max_length=255)
+    user = models.CharField(max_length=255, blank=True, null=True)
+    role = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'room_role_preselection'
+
+        
 class WerewolfOutlog(models.Model):
     room = models.CharField(max_length=32)
     out = models.SmallIntegerField()

@@ -9,4 +9,6 @@ urlpatterns = [
     path("getroom", views.getRoomInfo.as_view(), name="getRoomInfo"),
     path("findroom", views.findRoom.as_view(), name="findRoom"),
     path("seatact", views.seatAct.as_view(), name="seatAct"),
+    path("getselfinfoandroomroles", views.getSelfInfoandRoomRoles.as_view(), name="getSelfInfoandRoomRoles"),
+    path("preselected", views.preSelected.as_view(), name="preSelected"),
 ]

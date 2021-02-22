@@ -99,12 +99,12 @@ class getRoomInfo(APIView):
         for k in range(18):
             # 获取演员
             player = "player" + str(k+1)
-            playeruid = eval("obj." + player)
+            playeruid = getattr(obj,player)
             if actuallyuser == playeruid:
                 playernumber = k+1
                 # 获取角色
                 rolenumber = "role" + str(k+1)
-                roleuid = eval("obj." + rolenumber)
+                roleuid = getattr(obj,rolenumber)
                 rolename = None
                 if roleuid:
                     role = BaseRoles.objects.get(role_id=roleuid)
@@ -197,3 +197,58 @@ class seatAct(APIView):
                     "msg": "游戏状态异常，不能入座/更换座位"
                 }
         return Response(status=200, data=res)
+
+
+class getSelfInfoandRoomRoles(APIView):
+    def get(self, request): # user,room
+        userid = request.GET.get("user")
+        roomid = request.GET.get("room")
+        # 先获取个人信息 - 姓名和消费积分
+        user = BaseUser.objects.get(uid=userid)
+        username = user.uname
+        cpoint = user.consumer
+        res = {
+            "selfname": username,
+            "selfpoint": cpoint
+        }
+        roomconf = RoomInfo.objects.get(room_id=roomid)
+        roleslist = {}
+        for field in roomconf._meta.fields:
+            name = field.attname    # 获取字段名
+            value = getattr(roomconf, name)    #获取对象属性
+            if name[:2] not in ("g_","v_","w_","t_"):
+                continue
+            if value > 0:
+                role = BaseRoles.objects.get(role_id=name)
+                # roleslist.append({name:role.role_description})
+                roleslist[name] = role.role_description
+        res["roleslist"] = roleslist
+        return Response(status=200,data=res)
+
+
+class preSelected(APIView):
+    def get(self, request): # user,room,role
+        userid = request.GET.get("user")
+        roomid = request.GET.get("room")
+        roleid = request.GET.get("role")
+        res = {
+            "errcode":0
+        }
+        # 检查房间状态
+        room = RoomInfo.objects.get(room_id=roomid)
+        if room.status == 0:
+            selected = RoomRolePreselection.objects.filter(room_id=roomid,user=userid)
+            if selected:
+                selected[0].role = roleid
+                selected[0].save()
+            else:
+                selectedconf = {
+                    "room_id": roomid,
+                    "user": userid,
+                    "role": roleid
+                }
+                selected = RoomRolePreselection(**selectedconf)
+                selected.save()
+        else:
+            res["errcode"] = 1
+        return Response(status=200,data=res)
