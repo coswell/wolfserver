@@ -79,7 +79,7 @@ class createRoom(APIView):
 
 class getRoomInfo(APIView):
 
-    def get(self, request):
+    def get(self, request): # user,room
         userid = request.GET.get('user')
         roomid = request.GET.get('room')
         actuallyuser = BaseUser.objects.get(uid=userid)
@@ -87,19 +87,21 @@ class getRoomInfo(APIView):
             "selfname": actuallyuser.uname
         }
         room = RoomPlayer2Role.objects.get(room_id=roomid)
-        selfcard,playernumber = self.getselfseatinfo(userid, room)
+        selfcard,playernumber = self.getselfinfo(userid, room)
         tempdict["selfcard"] = selfcard
         tempdict["playernumber"] = playernumber
         room_ser = RoomDetailSer(room)
         return Response(status=200, data={**tempdict, **room_ser.data})
 
-    def getselfcard(self, actuallyuser, obj):
+    def getselfinfo(self, actuallyuser, obj):
         card = None
+        playernumber = None
         for k in range(18):
             # 获取演员
-            playernumber = "player" + str(k+1)
-            playeruid = eval("obj." + playernumber)
+            player = "player" + str(k+1)
+            playeruid = eval("obj." + player)
             if actuallyuser == playeruid:
+                playernumber = k+1
                 # 获取角色
                 rolenumber = "role" + str(k+1)
                 roleuid = eval("obj." + rolenumber)
@@ -111,29 +113,48 @@ class getRoomInfo(APIView):
                 break
         return (card,playernumber)
 
+
+class findRoom(APIView):
+    def get(self, request):
+        room = RoomInfo.objects.filter(status__in=[0,1])
+        if not room:
+            res = {
+                "errcode": 2,
+                "msg": "暂无可加入房间"
+            }
+        else:
+            res = {
+                "errcode": 0,
+                "roomid": room[0].room_id,
+                "judge": room[0].judge,
+                "msg": "加入成功！"
+            }
+        return Response(status=200, data=res)
+
+
 class seatAct(APIView):
 
-    def get(self, request): #user,room,pre,to
+    def get(self, request): # user,room,pre,to,type
         userid = request.GET.get('user')
-        preseat = request.GET.get('pre')
-        toseat = request.GET.get('to')
         roomid = request.GET.get('room')
         roominfo = RoomInfo.objects.get(room_id=roomid)
         room = RoomPlayer2Role.objects.get(room_id=roomid)
-        roomptoseat = getattr(room,toseat)
         if roominfo.status != 0:
             res = {
                 "errcode": 999,
                 "msg": "游戏状态异常，不能入座/更换座位"
             }
         elif request.GET.get('type') == "0": # 入座
+            toseat = request.GET.get('to')
+            roomptoseat = getattr(room,toseat)
             if roomptoseat != None: # 检查座位是否有人
                 res = {
                     "errcode": 1,
                     "msg": "该座位已经有人了！"
                 }
             else:
-                if preseat == '0' or not preseat : # 不需离座，直接入座
+                preseatnumber = request.GET.get('pre')
+                if preseatnumber == '0' or not preseatnumber : # 不需离座，直接入座
                     setattr(room, toseat, userid)
                     try:
                         room.save()
@@ -147,6 +168,7 @@ class seatAct(APIView):
                             "msg": "游戏状态异常，不能入座/更换座位"
                         }
                 else: # 先离座，后入座
+                    preseat = "player" + request.GET.get('pre')
                     setattr(room, preseat, None)
                     setattr(room, toseat, userid)
                     try:
@@ -161,6 +183,7 @@ class seatAct(APIView):
                             "msg": "游戏状态异常，不能入座/更换座位"
                         }
         else: # 离座
+            preseat = "player" + request.GET.get('pre')
             setattr(room, preseat, None)
             try:
                 room.save()
