@@ -33,7 +33,7 @@ class createRoom(APIView):
 
     # 创建一个状态为未开始的房间
     def post(self, request):
-        gamingrooms = RoomInfo.objects.filter(status_in=[0,1])
+        gamingrooms = RoomInfo.objects.filter(status__in=[0,1])
         if gamingrooms:
             gamingroom = gamingrooms[0]
             roomid = gamingroom.room_id
