@@ -64,7 +64,7 @@ class RoomDetailSer(serializers.ModelSerializer):
             rolename = None
             if roleuid:
                 role = models.BaseRoles.objects.get(role_id=roleuid)
-                rolename = role.role_description
+                rolename = role.role_name
             # 写入临时字典
             tempdict[playernumber]= playername
             tempdict[rolenumber]= rolename

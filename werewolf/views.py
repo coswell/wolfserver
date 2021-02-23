@@ -33,7 +33,7 @@ class createRoom(APIView):
 
     # 创建一个状态为未开始的房间
     def post(self, request):
-        gamingrooms = RoomInfo.objects.filter(status=0)
+        gamingrooms = RoomInfo.objects.filter(status_in=[0,1])
         if gamingrooms:
             gamingroom = gamingrooms[0]
             roomid = gamingroom.room_id
@@ -110,7 +110,7 @@ class getRoomInfo(APIView):
                 rolename = None
                 if roleuid:
                     role = BaseRoles.objects.get(role_id=roleuid)
-                    rolename = role.role_description
+                    rolename = role.role_name
                     card = rolename + '.jpg'
                 break
         return (card,playernumber)
@@ -222,8 +222,7 @@ class getSelfInfoandRoomRoles(APIView):
                 continue
             if value > 0:
                 role = BaseRoles.objects.get(role_id=name)
-                # roleslist.append({name:role.role_description})
-                roleslist[name] = role.role_description
+                roleslist[name] = role.role_name
         res["roleslist"] = roleslist
         return Response(status=200,data=res)
 
