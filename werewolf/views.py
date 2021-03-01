@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from werewolf.models import *
 
+from django.db.models import Q
 from django.core import serializers
 import json,time,random
 
@@ -13,7 +14,7 @@ class login(APIView):
     # 登录检查 
     def get(self, request):
         userid = request.GET.get('user')
-        user = BaseUser.objects.filter(uid=userid)
+        user = BaseUser.objects.filter(Q(uid=userid) | Q(uname=userid))
         if user:
             return Response(status=200)
         else:
