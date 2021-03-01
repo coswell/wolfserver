@@ -465,3 +465,21 @@ class divCard(APIView):
             room.status = 1
             room.save()
         return Response(status=200,data=res)
+
+
+class endGame(APIView):
+    def post(self,request):
+        EndInfo = json.loads(request.body)
+        optype = EndInfo["optype"]
+        roomid = EndInfo["room"]
+        res = {"errcode": 0}
+        if optype == "1":
+            room = RoomInfo.objects.filter(room_id=roomid)
+            if not room:
+                res["errcode"] = 1
+            else:
+                room[0].status = 2
+                room[0].save()
+        else:
+            res["errcode"] = 1
+        return Response(status=200,data=res)

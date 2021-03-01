@@ -12,4 +12,5 @@ urlpatterns = [
     path("getselfinfoandroomroles", views.getSelfInfoandRoomRoles.as_view(), name="getSelfInfoandRoomRoles"),
     path("preselected", views.preSelected.as_view(), name="preSelected"),
     path("divcard", views.divCard.as_view(), name="divCard"),
+    path("endgame", views.endGame.as_view(), name="endGame"),
 ]
